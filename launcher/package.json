@@ -1,0 +1,26 @@
+{
+  "name": "lan-play-bridge-launcher",
+  "version": "0.1.0",
+  "description": "Local companion launcher for lan-play-bridge — manages the lan-play client and integrates with the browser-based room system",
+  "main": "launcher.js",
+  "scripts": {
+    "start": "node launcher.js",
+    "package:win": "pkg launcher.js --targets node20-win-x64 --output dist/lan-play-bridge-launcher.exe",
+    "package:mac": "pkg launcher.js --targets node20-macos-x64 --output dist/lan-play-bridge-launcher-macos",
+    "package:linux": "pkg launcher.js --targets node20-linux-x64 --output dist/lan-play-bridge-launcher-linux"
+  },
+  "dependencies": {
+    "ws": "^8.17.0"
+  },
+  "devDependencies": {
+    "pkg": "^5.8.1"
+  },
+  "license": "GPL-3.0",
+  "private": true,
+  "pkg": {
+    "outputPath": "dist",
+    "assets": [
+      "config.js"
+    ]
+  }
+}

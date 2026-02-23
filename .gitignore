@@ -1,0 +1,43 @@
+# Dependencies
+node_modules/
+
+# Launcher build output
+launcher/dist/
+launcher/lan-play-win64.exe
+launcher/lan-play-macos
+launcher/lan-play-linux
+
+# OS files
+.DS_Store
+Thumbs.db
+Desktop.ini
+nul
+
+# Editor
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Environment
+.env
+.env.*
+
+# Logs
+*.log
+npm-debug.log*
+
+
+# Internal ops
+frlg-project-status.md
+deploy.sh
+
+# Reference/scratch files — not part of the codebase
+LanPlayDotComInstallSwitch.txt
+
+# Local launcher build config (bakes relay/origin into frlg-specific exe — never commit)
+launcher/config.js
+
+# Claude Code internal files
+.claude/

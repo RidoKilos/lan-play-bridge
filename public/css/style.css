@@ -1,0 +1,693 @@
+/*
+ * style.css — Layout & components for lan-play-bridge
+ *
+ * All colors reference CSS custom properties from theme.css.
+ * This file handles structure, spacing, and component styling only.
+ */
+
+/* ===================================================================
+   Reset
+   =================================================================== */
+*,
+*::before,
+*::after {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+/* ===================================================================
+   Base
+   =================================================================== */
+html {
+  font-size: 16px;
+  scroll-behavior: smooth;
+}
+
+body {
+  background: var(--bg-primary);
+  color: var(--text-primary);
+  font-family: var(--font-main);
+  line-height: 1.6;
+  min-height: 100vh;
+  display: flex;
+  flex-direction: column;
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+  transition: color var(--transition-fast);
+}
+a:hover {
+  color: var(--accent-hover);
+}
+
+img {
+  max-width: 100%;
+}
+
+/* ===================================================================
+   Layout
+   =================================================================== */
+.container {
+  max-width: 800px;
+  margin: 0 auto;
+  padding: var(--space-lg) var(--space-md);
+}
+
+main {
+  flex: 1;
+}
+
+/* ===================================================================
+   Navbar
+   =================================================================== */
+.navbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: var(--space-md) var(--space-lg);
+  background: var(--bg-secondary);
+  border-bottom: 1px solid var(--border);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo {
+  font-size: 1.25rem;
+  font-weight: 700;
+  color: var(--text-primary);
+  letter-spacing: -0.02em;
+}
+.logo:hover {
+  color: var(--accent);
+}
+
+.nav-links {
+  list-style: none;
+  display: flex;
+  gap: var(--space-md);
+}
+.nav-links a {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+}
+.nav-links a:hover,
+.nav-links a.active {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+.nav-toggle {
+  display: none;
+  background: none;
+  border: none;
+  color: var(--text-primary);
+  font-size: 1.5rem;
+  cursor: pointer;
+}
+
+/* ===================================================================
+   Pages (SPA sections)
+   =================================================================== */
+.page {
+  display: none;
+  animation: fadeIn var(--transition-base);
+}
+.page.active {
+  display: block;
+}
+
+@keyframes fadeIn {
+  from { opacity: 0; transform: translateY(4px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* ===================================================================
+   Home — Room Entry
+   =================================================================== */
+#room-entry {
+  text-align: center;
+  padding: var(--space-2xl) 0;
+}
+#room-entry h1 {
+  font-size: 2rem;
+  margin-bottom: var(--space-sm);
+}
+.subtitle {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-xl);
+  font-size: 1.05rem;
+}
+
+.room-form {
+  display: flex;
+  gap: var(--space-sm);
+  max-width: 420px;
+  margin: 0 auto var(--space-md);
+}
+.room-form input {
+  flex: 1;
+  padding: var(--space-sm) var(--space-md);
+  background: var(--bg-input);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  color: var(--text-primary);
+  font-size: 1rem;
+  font-family: var(--font-main);
+  outline: none;
+  transition: border-color var(--transition-fast);
+}
+.room-form input::placeholder {
+  color: var(--text-muted);
+}
+.room-form input:focus {
+  border-color: var(--border-focus);
+}
+
+.hint {
+  color: var(--text-muted);
+  font-size: 0.85rem;
+}
+
+/* ===================================================================
+   Home — Room Active (guided steps)
+   =================================================================== */
+.room-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: var(--space-lg);
+  flex-wrap: wrap;
+  gap: var(--space-sm);
+}
+.room-header h2 {
+  font-size: 1.3rem;
+}
+
+.badge {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-sm);
+  border-radius: var(--radius-sm);
+  font-size: 0.8rem;
+  font-weight: 600;
+  text-transform: uppercase;
+  letter-spacing: 0.04em;
+}
+.badge-waiting {
+  background: var(--warning-subtle);
+  color: var(--warning);
+}
+.badge-success {
+  background: var(--success-subtle);
+  color: var(--success);
+}
+.badge-warning {
+  background: var(--warning-subtle);
+  color: var(--warning);
+}
+
+/* --- Guided Steps --- */
+.guided-steps {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.step {
+  display: flex;
+  gap: var(--space-md);
+  padding: var(--space-md);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--border);
+  background: var(--bg-secondary);
+  transition: border-color var(--transition-base), opacity var(--transition-base);
+}
+
+.step[data-status="pending"] {
+  opacity: 0.4;
+}
+.step[data-status="active"] {
+  border-color: var(--accent);
+  opacity: 1;
+}
+.step[data-status="complete"] {
+  border-color: var(--success);
+  opacity: 1;
+}
+
+.step-indicator {
+  flex-shrink: 0;
+  width: 36px;
+  height: 36px;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-weight: 700;
+  font-size: 0.9rem;
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+  transition: background var(--transition-base), color var(--transition-base);
+}
+.step[data-status="active"] .step-indicator {
+  background: var(--accent);
+  color: #fff;
+}
+.step[data-status="complete"] .step-indicator {
+  background: var(--success);
+  color: #fff;
+}
+
+.step-content h3 {
+  font-size: 1rem;
+  margin-bottom: var(--space-xs);
+}
+.step-content p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-sm);
+}
+
+.relay-address {
+  display: inline-block;
+  padding: var(--space-xs) var(--space-sm);
+  background: var(--bg-tertiary);
+  border-radius: var(--radius-sm);
+  font-family: var(--font-mono);
+  font-size: 0.9rem;
+  color: var(--accent);
+  margin-bottom: var(--space-sm);
+  user-select: all;
+}
+
+.checkbox-label {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  font-size: 0.85rem;
+  color: var(--text-secondary);
+  cursor: pointer;
+  margin-top: var(--space-xs);
+}
+.checkbox-label input[type="checkbox"] {
+  accent-color: var(--accent);
+  width: 16px;
+  height: 16px;
+}
+
+/* ===================================================================
+   Buttons
+   =================================================================== */
+.btn {
+  display: inline-block;
+  padding: var(--space-sm) var(--space-lg);
+  border-radius: var(--radius-md);
+  font-size: 0.95rem;
+  font-weight: 600;
+  font-family: var(--font-main);
+  cursor: pointer;
+  border: none;
+  transition: background var(--transition-fast), transform var(--transition-fast);
+  text-align: center;
+}
+.btn:active {
+  transform: scale(0.97);
+}
+
+.btn-primary {
+  background: var(--accent);
+  color: #fff;
+}
+.btn-primary:hover {
+  background: var(--accent-hover);
+  color: #fff;
+}
+
+.btn-secondary {
+  background: var(--bg-tertiary);
+  color: var(--text-primary);
+  border: 1px solid var(--border);
+}
+.btn-secondary:hover {
+  background: var(--border);
+  color: var(--text-primary);
+}
+
+.btn-sm {
+  padding: var(--space-xs) var(--space-md);
+  font-size: 0.85rem;
+}
+
+/* ===================================================================
+   Content blocks (How It Works, DIY, etc.)
+   =================================================================== */
+.content-block {
+  margin-bottom: var(--space-xl);
+}
+.content-block h2 {
+  font-size: 1.3rem;
+  margin-bottom: var(--space-sm);
+  color: var(--text-primary);
+}
+.content-block p {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+}
+.content-block ul,
+.content-block ol {
+  color: var(--text-secondary);
+  padding-left: var(--space-lg);
+  margin-bottom: var(--space-sm);
+}
+.content-block li {
+  margin-bottom: var(--space-xs);
+}
+
+/* ===================================================================
+   Cards (Download section)
+   =================================================================== */
+.download-cards {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: var(--space-md);
+  margin-bottom: var(--space-xl);
+}
+
+.card {
+  background: var(--bg-secondary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-lg);
+  padding: var(--space-lg);
+}
+.card h3 {
+  margin-bottom: var(--space-sm);
+}
+.card p {
+  color: var(--text-secondary);
+  font-size: 0.9rem;
+  margin-bottom: var(--space-md);
+}
+
+/* ===================================================================
+   Callouts (info, warning boxes)
+   =================================================================== */
+.callout {
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  margin-bottom: var(--space-lg);
+  border: 1px solid var(--border);
+}
+.callout h3 {
+  margin-bottom: var(--space-sm);
+}
+.callout p {
+  color: var(--text-secondary);
+  margin-bottom: var(--space-sm);
+  font-size: 0.9rem;
+}
+.callout p:last-child {
+  margin-bottom: 0;
+}
+.callout .btn {
+  margin-top: var(--space-sm);
+}
+.callout-info {
+  background: var(--accent-subtle);
+  border-color: rgba(74, 158, 255, 0.25);
+}
+.callout-warning {
+  background: var(--warning-subtle);
+  border-color: rgba(251, 191, 36, 0.25);
+}
+
+/* ===================================================================
+   IP assignment display (room flow)
+   =================================================================== */
+.ip-assignment {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-sm);
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+}
+.ip-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+}
+.ip-row + .ip-row {
+  border-top: 1px solid var(--border);
+}
+.ip-label {
+  color: var(--text-secondary);
+}
+.ip-value {
+  color: var(--accent);
+  font-weight: 600;
+  user-select: all;
+}
+
+/* ===================================================================
+   Client status indicator (room flow step 3)
+   =================================================================== */
+.client-status {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 0.85rem;
+  margin: var(--space-sm) 0;
+}
+.client-status::before {
+  content: '';
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  flex-shrink: 0;
+}
+.client-status-connected {
+  background: var(--success-subtle);
+  color: var(--success);
+}
+.client-status-connected::before {
+  background: var(--success);
+}
+.client-status-waiting {
+  background: var(--bg-tertiary);
+  color: var(--text-muted);
+}
+.client-status-waiting::before {
+  background: var(--text-muted);
+  animation: pulse 2s ease-in-out infinite;
+}
+.client-status-warning {
+  background: var(--warning-subtle);
+  color: var(--warning);
+}
+.client-status-warning::before {
+  background: var(--warning);
+}
+
+@keyframes pulse {
+  0%, 100% { opacity: 0.3; }
+  50% { opacity: 1; }
+}
+
+/* ===================================================================
+   Settings table (Switch Setup page)
+   =================================================================== */
+.settings-table {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-sm) var(--space-md);
+  margin-bottom: var(--space-md);
+}
+.settings-row {
+  display: flex;
+  justify-content: space-between;
+  padding: var(--space-xs) 0;
+  font-size: 0.95rem;
+}
+.settings-row + .settings-row {
+  border-top: 1px solid var(--border);
+}
+.settings-label {
+  color: var(--text-secondary);
+  font-weight: 500;
+}
+.settings-value {
+  color: var(--text-primary);
+  font-family: var(--font-mono);
+  font-weight: 600;
+}
+
+/* ===================================================================
+   Code blocks (DIY guide)
+   =================================================================== */
+pre {
+  background: var(--bg-tertiary);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-md);
+  padding: var(--space-md);
+  overflow-x: auto;
+  margin-bottom: var(--space-md);
+}
+pre code {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  color: var(--text-primary);
+  background: none;
+  padding: 0;
+}
+code {
+  font-family: var(--font-mono);
+  font-size: 0.85rem;
+  background: var(--bg-tertiary);
+  padding: 0.1em 0.4em;
+  border-radius: var(--radius-sm);
+}
+
+/* ===================================================================
+   Footer
+   =================================================================== */
+footer {
+  border-top: 1px solid var(--border);
+  padding: var(--space-lg) var(--space-md);
+  text-align: center;
+  color: var(--text-muted);
+  font-size: 0.8rem;
+}
+
+/* ===================================================================
+   Utility
+   =================================================================== */
+.hidden {
+  display: none !important;
+}
+
+
+/* ===================================================================
+   Toast notifications
+   =================================================================== */
+#toast-container {
+  position: fixed;
+  top: var(--space-lg);
+  right: var(--space-lg);
+  z-index: 1000;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-sm);
+  pointer-events: none;
+}
+
+.toast {
+  display: flex;
+  align-items: center;
+  gap: var(--space-sm);
+  padding: var(--space-sm) var(--space-md);
+  border-radius: var(--radius-md);
+  font-size: 0.9rem;
+  font-weight: 500;
+  pointer-events: auto;
+  animation: toast-in var(--transition-base) ease forwards;
+  max-width: 360px;
+  box-shadow: 0 4px 12px rgba(0, 0, 0, 0.4);
+}
+.toast-error {
+  background: rgba(248, 113, 113, 0.15);
+  border: 1px solid rgba(248, 113, 113, 0.3);
+  color: var(--error);
+}
+.toast-warning {
+  background: var(--warning-subtle);
+  border: 1px solid rgba(251, 191, 36, 0.3);
+  color: var(--warning);
+}
+.toast-success {
+  background: var(--success-subtle);
+  border: 1px solid rgba(52, 211, 153, 0.3);
+  color: var(--success);
+}
+.toast.toast-out {
+  animation: toast-out var(--transition-base) ease forwards;
+}
+
+@keyframes toast-in {
+  from { opacity: 0; transform: translateX(20px); }
+  to   { opacity: 1; transform: translateX(0); }
+}
+@keyframes toast-out {
+  from { opacity: 1; transform: translateX(0); }
+  to   { opacity: 0; transform: translateX(20px); }
+}
+
+/* ===================================================================
+   Copy room code button
+   =================================================================== */
+.btn-copy {
+  background: none;
+  border: none;
+  color: var(--text-muted);
+  cursor: pointer;
+  font-size: 1rem;
+  padding: var(--space-xs);
+  margin-left: var(--space-xs);
+  border-radius: var(--radius-sm);
+  transition: color var(--transition-fast), background var(--transition-fast);
+  vertical-align: middle;
+}
+.btn-copy:hover {
+  color: var(--text-primary);
+  background: var(--bg-tertiary);
+}
+
+/* ===================================================================
+   Responsive
+   =================================================================== */
+@media (max-width: 640px) {
+  .nav-toggle {
+    display: block;
+  }
+  .nav-links {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    right: 0;
+    flex-direction: column;
+    background: var(--bg-secondary);
+    border-bottom: 1px solid var(--border);
+    padding: var(--space-sm) var(--space-lg);
+    gap: 0;
+  }
+  .nav-links.open {
+    display: flex;
+  }
+  .nav-links a {
+    padding: var(--space-sm) 0;
+    display: block;
+  }
+
+  .room-form {
+    flex-direction: column;
+  }
+
+  #room-entry h1 {
+    font-size: 1.5rem;
+  }
+
+  .download-cards {
+    grid-template-columns: 1fr;
+  }
+}

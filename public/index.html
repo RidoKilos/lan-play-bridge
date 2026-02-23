@@ -1,0 +1,456 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>frlg.online &mdash; Play Switch Games Online</title>
+  <meta name="description" content="Play Nintendo Switch games online with friends using LAN Play tunneling. Free, open-source, no local meetup required.">
+  <link rel="stylesheet" href="/css/theme.css">
+  <link rel="stylesheet" href="/css/style.css">
+</head>
+<body>
+
+  <!-- ================================================================
+       Navbar
+       ================================================================ -->
+  <nav class="navbar">
+    <a href="#home" class="logo">frlg.online</a>
+    <button class="nav-toggle" aria-label="Toggle navigation">&#9776;</button>
+    <ul class="nav-links">
+      <li><a href="#home">Home</a></li>
+      <li><a href="#how-it-works">How It Works</a></li>
+      <li><a href="#switch-setup">Switch Setup</a></li>
+      <li><a href="#download">Download</a></li>
+      <li><a href="#diy">DIY Guide</a></li>
+      <li><a href="#credits">Credits</a></li>
+    </ul>
+  </nav>
+
+  <main>
+
+    <!-- ==============================================================
+         HOME / MATCHMAKING
+         ============================================================== -->
+    <section id="home" class="page">
+      <div class="container">
+
+        <!-- Room entry (initial state) -->
+        <div id="room-entry">
+          <h1>Trade Pokemon Online</h1>
+          <p class="subtitle">Connect with a friend to trade in Pokemon FireRed &amp; LeafGreen on Switch &mdash; no local meetup required.</p>
+          <div class="room-form">
+            <input type="text" id="room-code-input" placeholder="Enter room code" maxlength="20" autocomplete="off" spellcheck="false">
+            <button id="join-room-btn" class="btn btn-primary">Join Room</button>
+          </div>
+          <p class="hint">Share the same room code with your trading partner to connect.</p>
+        </div>
+
+        <!-- Room active (guided step flow) -->
+        <div id="room-active" class="hidden">
+          <div class="room-header">
+            <h2>Room: <span id="room-code-display"></span><button id="copy-room-code" class="btn-copy" title="Copy room code" aria-label="Copy room code">&#128203;</button></h2>
+            <span id="room-status-badge" class="badge badge-waiting">Waiting</span>
+          </div>
+
+          <div class="guided-steps">
+            <!-- Step 1: Partner connection (server-driven) -->
+            <div class="step" id="step-1" data-status="active">
+              <div class="step-indicator">1</div>
+              <div class="step-content">
+                <h3>Connect with partner</h3>
+                <p>Waiting for your trading partner to join this room&hellip;</p>
+              </div>
+            </div>
+
+            <!-- Step 2: Configure Switch (shows assigned IP) -->
+            <div class="step" id="step-2" data-status="pending">
+              <div class="step-indicator">2</div>
+              <div class="step-content">
+                <h3>Configure your Switch</h3>
+                <p>Go to <strong>System Settings &rarr; Internet &rarr; Internet Settings</strong>, select your network, and set these values manually:</p>
+                <div class="ip-assignment">
+                  <div class="ip-row"><span class="ip-label">Your IP Address:</span> <span class="ip-value" id="assigned-ip">joining&hellip;</span></div>
+                  <div class="ip-row"><span class="ip-label">Subnet Mask:</span> <span class="ip-value">255.255.0.0</span></div>
+                  <div class="ip-row"><span class="ip-label">Gateway:</span> <span class="ip-value">10.13.37.1</span></div>
+                  <div class="ip-row"><span class="ip-label">Primary DNS:</span> <span class="ip-value">8.8.8.8</span></div>
+                  <div class="ip-row"><span class="ip-label">Secondary DNS:</span> <span class="ip-value">1.1.1.1</span></div>
+                  <div class="ip-row"><span class="ip-label">MTU:</span> <span class="ip-value">1400</span></div>
+                </div>
+                <p class="hint">Need help? See the full <a href="#switch-setup">Switch Setup guide</a>.</p>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="step-2-check"> My Switch is configured
+                </label>
+              </div>
+            </div>
+
+            <!-- Step 3: PC client (auto-detected via launcher or manual) -->
+            <div class="step" id="step-3" data-status="pending">
+              <div class="step-indicator">3</div>
+              <div class="step-content">
+                <h3>Run the launcher</h3>
+                <p>Download and run the <strong>lan-play-bridge launcher</strong> on your PC. It handles everything automatically &mdash; Npcap, the lan-play client, and connecting to our relay.</p>
+                <a href="#download" class="btn btn-sm btn-secondary">Go to Downloads</a>
+                <div id="client-status" class="client-status client-status-waiting">
+                  <span id="client-status-text">Launcher not detected &mdash; waiting for connection&hellip;</span>
+                </div>
+                <p class="hint">Your PC and Switch must be on the same Wi-Fi network.</p>
+                <label class="checkbox-label">
+                  <input type="checkbox" id="step-3-check"> <span>Or check manually: client is running and connected</span>
+                </label>
+              </div>
+            </div>
+
+            <!-- Step 4: Play -->
+            <div class="step" id="step-4" data-status="pending">
+              <div class="step-indicator">4</div>
+              <div class="step-content">
+                <h3>Play!</h3>
+                <p>Launch your game and start multiplayer. If your game has a <strong>LAN Play</strong> option, select that. If it uses <strong>Local Wireless</strong> (most Pok&eacute;mon games &mdash; requires CFW + ldn_mitm), choose that option. Your partner should appear as if they're right next to you.</p>
+                <p class="hint">Failing the Switch internet/DNS connectivity test is normal &mdash; ignore it.</p>
+              </div>
+            </div>
+          </div>
+
+          <button id="leave-room-btn" class="btn btn-secondary">Leave Room</button>
+        </div>
+
+      </div>
+    </section>
+
+    <!-- ==============================================================
+         HOW IT WORKS
+         ============================================================== -->
+    <section id="how-it-works" class="page">
+      <div class="container">
+        <h1>How It Works</h1>
+
+        <div class="content-block">
+          <h2>The Problem</h2>
+          <p>Pokemon FireRed &amp; LeafGreen on Nintendo Switch only support <strong>local wireless trading</strong>. You and your trading partner need to be physically next to each other.</p>
+          <p>frlg.online removes that limitation.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>The Solution</h2>
+          <p>We use <strong>LAN tunneling</strong> (via <a href="https://github.com/spacemeowx2/switch-lan-play" target="_blank" rel="noopener">switch-lan-play</a>) to bridge your Switch's network traffic over the internet to your partner's network.</p>
+          <ol>
+            <li>You configure your Switch to use a virtual network address</li>
+            <li>A client on your PC captures that traffic and sends it to our relay server</li>
+            <li>The relay forwards it to your partner's PC</li>
+            <li>Their PC delivers it to their Switch</li>
+            <li>Both Switches believe they're on the same local network</li>
+          </ol>
+        </div>
+
+        <div class="content-block">
+          <h2>What You Need</h2>
+          <ul>
+            <li>A <strong>Nintendo Switch</strong> with a one-time <a href="#switch-setup">network configuration</a></li>
+            <li>A <strong>PC</strong> (Windows, Mac, or Linux) on the same Wi-Fi network as your Switch</li>
+            <li><strong>Npcap</strong> (Windows) or <strong>libpcap</strong> (Mac/Linux) &mdash; a packet capture driver</li>
+            <li>The <strong>lan-play client</strong> &mdash; free, open-source (<a href="#download">Downloads</a>)</li>
+            <li>A <strong>trading partner</strong> with the same setup</li>
+          </ul>
+        </div>
+
+        <div class="content-block">
+          <h2>LAN Play vs Local Wireless</h2>
+          <div class="callout callout-info">
+            <p>There's an important distinction between two types of Switch multiplayer:</p>
+            <p><strong>LAN Play</strong> &mdash; Some games have a dedicated &ldquo;LAN Play&rdquo; option in their menus (e.g. Mario Kart 8 Deluxe, Pokken Tournament). These work with switch-lan-play on <strong>stock (unmodified) firmware</strong>.</p>
+            <p><strong>Local Wireless</strong> &mdash; Many games only offer &ldquo;Local Communication&rdquo; mode, which uses the Switch's ad-hoc wireless. Tunneling these requires a sysmodule called <strong>ldn_mitm</strong>, which only runs on <strong>custom firmware (CFW/Atmosphere)</strong>.</p>
+            <p>The game this site was built for is not yet released. Based on how similar Pok&eacute;mon titles work, it will almost certainly use <strong>Local Wireless</strong> &mdash; meaning CFW + ldn_mitm will be required. If it ships with native LAN Play support, stock firmware will work. Check the <a href="#switch-setup">Switch Setup guide</a> for details.</p>
+          </div>
+        </div>
+
+        <div class="content-block">
+          <h2>Is It Safe?</h2>
+          <p>Yes. This entire project is <strong>open-source</strong> &mdash; you can inspect every line of code. The relay server only sees room codes and IP addresses. We never inspect or store your game data.</p>
+          <p>If you prefer full control, you can <a href="#diy">run your own relay server</a>.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================================
+         SWITCH SETUP
+         ============================================================== -->
+    <section id="switch-setup" class="page">
+      <div class="container">
+        <h1>Switch Setup</h1>
+        <p class="subtitle">A one-time network configuration on your Nintendo Switch. Takes about 2 minutes.</p>
+
+        <div class="content-block">
+          <h2>What You're Doing</h2>
+          <p>You're telling your Switch to use a specific virtual network address so the lan-play client on your PC can capture and tunnel its traffic to your trading partner.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Step 1 &mdash; Open Network Settings</h2>
+          <p>On your Switch, go to:</p>
+          <p><strong>System Settings &rarr; Internet &rarr; Internet Settings</strong></p>
+          <p>Select your Wi-Fi network, then choose <strong>Change Settings</strong>.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Step 2 &mdash; Set IP Address (Manual)</h2>
+          <p>Change <strong>IP Address Settings</strong> from &ldquo;Automatic&rdquo; to <strong>Manual</strong>, then enter:</p>
+          <div class="settings-table">
+            <div class="settings-row"><span class="settings-label">IP Address</span><span class="settings-value">10.13.<em>XX</em>.<em>YY</em></span></div>
+            <div class="settings-row"><span class="settings-label">Subnet Mask</span><span class="settings-value">255.255.0.0</span></div>
+            <div class="settings-row"><span class="settings-label">Gateway</span><span class="settings-value">10.13.37.1</span></div>
+          </div>
+          <div class="callout callout-info">
+            <p><strong>What IP do I use?</strong> When you join a room on frlg.online, we assign you a unique IP automatically. Just enter the one shown in your room. If you're setting up outside of a room, pick any address from <code>10.13.0.1</code> to <code>10.13.255.254</code> &mdash; just don't use <code>10.13.37.1</code> (that's the gateway) and don't use the same address as your partner.</p>
+          </div>
+        </div>
+
+        <div class="content-block">
+          <h2>Step 3 &mdash; Set DNS (Manual)</h2>
+          <p>Change <strong>DNS Settings</strong> from &ldquo;Automatic&rdquo; to <strong>Manual</strong>, then enter:</p>
+          <div class="settings-table">
+            <div class="settings-row"><span class="settings-label">Primary DNS</span><span class="settings-value">8.8.8.8</span></div>
+            <div class="settings-row"><span class="settings-label">Secondary DNS</span><span class="settings-value">1.1.1.1</span></div>
+          </div>
+          <div class="callout callout-info">
+            <p><strong>CFW users:</strong> If you're running custom firmware and want to block Nintendo telemetry, use <a href="https://gitlab.com/a/90dns" target="_blank" rel="noopener">90dns</a> instead: Primary <code>163.172.141.219</code> / Secondary <code>207.246.121.77</code></p>
+          </div>
+        </div>
+
+        <div class="content-block">
+          <h2>Step 4 &mdash; Set MTU</h2>
+          <p>Set <strong>MTU</strong> to <strong>1400</strong>. This reduces packet fragmentation over the tunnel.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Step 5 &mdash; Save &amp; Connect</h2>
+          <p>Save your settings. Your Switch will test the connection &mdash; <strong>the DNS and internet test may fail, and that's normal</strong>. This does not affect LAN play functionality.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Reverting to Normal</h2>
+          <p>When you're done playing, change both <strong>IP Address Settings</strong> and <strong>DNS Settings</strong> back to <strong>Automatic</strong> to restore normal internet access.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Which Games Work?</h2>
+          <div class="callout callout-warning">
+            <p><strong>On stock (unmodified) firmware:</strong> Games with a dedicated <strong>&ldquo;LAN Play&rdquo;</strong> menu option work directly. Examples: Mario Kart 8 Deluxe, Pokken Tournament DX, ARMS.</p>
+            <p><strong>Games that only have &ldquo;Local Wireless&rdquo;:</strong> These require <strong>ldn_mitm</strong>, a sysmodule that only runs on <strong>custom firmware (Atmosphere)</strong>. This includes most Pokemon games, Animal Crossing, Super Smash Bros, and many others. <a href="https://github.com/ldn-mitm/ldn_mitm" target="_blank" rel="noopener">More info on ldn_mitm</a>.</p>
+          </div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================================
+         DOWNLOAD
+         ============================================================== -->
+    <section id="download" class="page">
+      <div class="container">
+        <h1>Download</h1>
+        <p class="subtitle">You need two things on your PC: a packet capture driver and the lan-play client.</p>
+
+        <!-- Npcap prerequisite callout -->
+        <div class="callout callout-warning">
+          <h3>Windows Users: Install Npcap First</h3>
+          <p>The lan-play client requires <strong>Npcap</strong> to capture network packets. Without it, you'll get a <code>wpcap.dll not found</code> error.</p>
+          <p>During installation, check <strong>&ldquo;Install Npcap in WinPcap API-compatible Mode&rdquo;</strong>.</p>
+          <a href="https://npcap.com/#download" target="_blank" rel="noopener" class="btn btn-primary btn-sm">Download Npcap</a>
+        </div>
+
+        <div class="content-block">
+          <h2>Recommended: lan-play-bridge Launcher</h2>
+          <p>The easiest way to connect. Downloads the lan-play client automatically, connects to our relay, and integrates with the room system on this site. Just run it and go.</p>
+        </div>
+
+        <div class="download-cards">
+          <div class="card">
+            <h3>Windows</h3>
+            <p>Download <code>lan-play-bridge-launcher.exe</code> and run it. Requires <a href="https://npcap.com/#download" target="_blank" rel="noopener">Npcap</a> (see above).</p>
+            <a href="https://github.com/RidoKilos/lan-play-bridge/releases" target="_blank" rel="noopener" class="btn btn-primary btn-sm">Download</a>
+          </div>
+          <div class="card">
+            <h3>macOS</h3>
+            <p>Coming soon. For now, use the manual method below.</p>
+          </div>
+          <div class="card">
+            <h3>Linux</h3>
+            <p>Coming soon. For now, use the manual method below.</p>
+          </div>
+        </div>
+
+        <div class="content-block">
+          <h2>Manual Method (Advanced)</h2>
+          <p>If you prefer to run the lan-play client directly:</p>
+          <ol>
+            <li>Install <strong>Npcap</strong> (Windows) or <strong>libpcap</strong> (Mac: <code>brew install libpcap</code> / Linux: <code>sudo apt install libpcap0.8</code>)</li>
+            <li>Download the lan-play binary for your platform from <a href="https://github.com/spacemeowx2/switch-lan-play/releases" target="_blank" rel="noopener">switch-lan-play releases</a></li>
+            <li>Run it as Administrator / sudo and connect to our relay:</li>
+          </ol>
+          <pre><code>lan-play --relay-server-addr frlg.online:11451</code></pre>
+          <p>Your PC and Switch <strong>must be on the same Wi-Fi network</strong>.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Troubleshooting</h2>
+          <ul>
+            <li><strong>&ldquo;wpcap.dll not found&rdquo;</strong> &mdash; Install <a href="https://npcap.com/#download" target="_blank" rel="noopener">Npcap</a> with WinPcap compatibility mode enabled.</li>
+            <li><strong>Client exits immediately</strong> &mdash; Make sure you're running as Administrator (Windows) or with <code>sudo</code> (Mac/Linux).</li>
+            <li><strong>No interfaces found</strong> &mdash; Your PC needs a Wi-Fi adapter on the same network as the Switch. Most laptops have one built-in. Desktops may need a USB Wi-Fi adapter (~$10&ndash;15).</li>
+            <li><strong>Launcher won't connect to site</strong> &mdash; Make sure you're using Chrome, Edge, or Firefox. Safari doesn't support the launcher auto-detection; use the manual checkbox in the room flow instead.</li>
+          </ul>
+        </div>
+
+        <div class="content-block">
+          <h2>Source Code</h2>
+          <p>The launcher and matchmaking server are open-source under GPL-3.0. You can review every line of code, build it yourself, or contribute.</p>
+          <a href="https://github.com/RidoKilos/lan-play-bridge" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">lan-play-bridge on GitHub</a>
+          <a href="https://github.com/spacemeowx2/switch-lan-play" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">switch-lan-play on GitHub</a>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================================
+         DIY / SELF-HOSTING GUIDE
+         ============================================================== -->
+    <section id="diy" class="page">
+      <div class="container">
+        <h1>DIY / Self-Hosting Guide</h1>
+        <p class="subtitle">Don't want to trust our server? Run your own. Here's exactly how we built ours.</p>
+
+        <div class="content-block">
+          <h2>What You'll Set Up</h2>
+          <p>A relay server that bridges local wireless traffic between two Switch consoles over the internet. This is the same setup that powers frlg.online.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Requirements</h2>
+          <ul>
+            <li>A VPS or server with a public IP address (Ubuntu 22.04 recommended)</li>
+            <li>Basic Linux command-line knowledge</li>
+            <li>About 15 minutes</li>
+          </ul>
+        </div>
+
+        <div class="content-block">
+          <h2>Step 1 &mdash; Get a Server</h2>
+          <p>Any VPS provider works (Hetzner, DigitalOcean, Linode, etc.). A minimal instance (1&ndash;2 vCPU, 1&ndash;2 GB RAM) is more than enough. Choose a location close to you and your trading partners.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Step 2 &mdash; Secure the Server</h2>
+          <pre><code># Create a non-root user
+adduser lanplay
+usermod -aG sudo lanplay
+
+# In /etc/ssh/sshd_config, set:
+#   PermitRootLogin no
+#   PasswordAuthentication no
+sudo systemctl restart sshd
+
+# Firewall
+sudo ufw allow 22/tcp
+sudo ufw allow 11451/udp
+sudo ufw enable
+
+# Intrusion prevention
+sudo apt install fail2ban -y
+sudo systemctl enable fail2ban</code></pre>
+        </div>
+
+        <div class="content-block">
+          <h2>Step 3 &mdash; Install switch-lan-play</h2>
+          <pre><code>mkdir ~/switch-lan-play &amp;&amp; cd ~/switch-lan-play
+
+# Download the latest Linux binary
+wget https://github.com/spacemeowx2/switch-lan-play/releases/latest/download/lan-play-linux
+chmod +x lan-play-linux
+
+# Quick test
+./lan-play-linux --relay-server-addr 0.0.0.0:11451</code></pre>
+        </div>
+
+        <div class="content-block">
+          <h2>Step 4 &mdash; Run as a Service</h2>
+          <pre><code>sudo tee /etc/systemd/system/switch-lan-play.service &lt;&lt;'EOF'
+[Unit]
+Description=switch-lan-play relay server
+After=network.target
+
+[Service]
+Type=simple
+User=lanplay
+ExecStart=/home/lanplay/switch-lan-play/lan-play-linux --relay-server-addr 0.0.0.0:11451
+Restart=always
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target
+EOF
+
+sudo systemctl daemon-reload
+sudo systemctl enable switch-lan-play
+sudo systemctl start switch-lan-play</code></pre>
+        </div>
+
+        <div class="content-block">
+          <h2>Step 5 &mdash; Connect</h2>
+          <p>Point your lan-play clients at <code>your-server-ip:11451</code> and you're set. Both players connect to your relay, and their Switches will see each other.</p>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==============================================================
+         CREDITS / ABOUT
+         ============================================================== -->
+    <section id="credits" class="page">
+      <div class="container">
+        <h1>Credits &amp; About</h1>
+
+        <div class="content-block">
+          <h2>This Project</h2>
+          <p>frlg.online is a free, open-source service that helps Pokemon FireRed &amp; LeafGreen players trade online. Built by fans who think everyone should be able to trade, regardless of geography.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Built With</h2>
+          <p><strong>switch-lan-play</strong> by <a href="https://github.com/spacemeowx2" target="_blank" rel="noopener">spacemeowx2</a> &mdash; the open-source LAN tunneling tool that makes all of this possible.</p>
+          <a href="https://github.com/spacemeowx2/switch-lan-play" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">View on GitHub</a>
+        </div>
+
+        <div class="content-block">
+          <h2>License &amp; Source Code</h2>
+          <p>This project is licensed under <strong>GPL-3.0</strong>, consistent with the switch-lan-play license. The matchmaking server and launcher are fully open-source &mdash; you can review every line of code.</p>
+          <a href="https://github.com/RidoKilos/lan-play-bridge" target="_blank" rel="noopener" class="btn btn-secondary btn-sm">View Source on GitHub</a>
+        </div>
+
+        <div class="content-block">
+          <h2>Supporting This Service</h2>
+          <p>frlg.online is free to use, and currently ad-free. If you'd like to support the project, share it with your friends.</p>
+        </div>
+
+        <div class="content-block">
+          <h2>Disclaimer</h2>
+          <p>This project is not affiliated with, endorsed by, or associated with Nintendo, The Pokemon Company, or Game Freak. Pokemon and all related marks are trademarks of their respective owners.</p>
+        </div>
+      </div>
+    </section>
+
+  </main>
+
+  <!-- ================================================================
+       Footer
+       ================================================================ -->
+  <footer>
+    <div class="container">
+      <p>&copy; 2026 frlg.online &mdash; <a href="https://github.com/RidoKilos/lan-play-bridge" target="_blank" rel="noopener">Open source</a>, fan-made, not affiliated with Nintendo or The Pokemon Company.</p>
+    </div>
+  </footer>
+
+  <!-- Toast container -->
+  <div id="toast-container" aria-live="polite"></div>
+
+  <!-- Socket.io client is served automatically by the Node.js server -->
+  <script src="/socket.io/socket.io.js"></script>
+  <script src="/js/app.js"></script>
+</body>
+</html>
